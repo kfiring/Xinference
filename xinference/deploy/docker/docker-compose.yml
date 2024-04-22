@@ -2,9 +2,16 @@ version: '3.8'
 
 services:
   xinference:
-    image: xprobe/xinference:latest
+    build:
+      context: ../../../
+      dockerfile: /xinference/deploy/docker/Dockerfile
+      extra_hosts: 
+        - "raw.githubusercontent.com:185.199.108.133"
+    image: gongjiaing/xinference
+    # image: xprobe/xinference:latest
+    container_name: xinference
     ports:
-      - "9997:9997"
+      - "${HOST_UI_PORT}:${CONTAINER_UI_PORT}"
 #    volumes:
 #      # Replace <xinference_home> with your xinference home path on the host machine
 #      - <xinference_home>:/root/.xinference
@@ -17,7 +24,12 @@ services:
 #    environment:
 #      # add envs here. Here's an example, if you want to download model from modelscope
 #      - XINFERENCE_MODEL_SRC=modelscope
-    command: xinference-local --host 0.0.0.0 --port 9997
+    environment:
+      - XINFERENCE_HOME=${CONTAINER_MODEL_DIR}
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+    command: xinference-local --host 0.0.0.0 --port ${CONTAINER_UI_PORT}
+    volumes:
+      - ${HOST_MODEL_DIR}:${CONTAINER_MODEL_DIR}
     deploy:
       resources:
         reservations:

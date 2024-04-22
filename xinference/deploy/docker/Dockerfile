@@ -5,6 +5,7 @@ COPY . /opt/inference
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 14.21.1
 
+RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list
 RUN apt-get -y update \
   && apt install -y curl procps git libgl1 \
   && mkdir -p $NVM_DIR \
@@ -17,7 +18,8 @@ RUN apt-get -y update \
 
 ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-ARG PIP_INDEX=https://pypi.org/simple
+# ARG PIP_INDEX=https://pypi.org/simple
+ARG PIP_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple
 RUN python -m pip install --upgrade -i "$PIP_INDEX" pip && \
     CMAKE_ARGS="-DGGML_CUBLAS=ON" pip install -i "$PIP_INDEX" -U chatglm-cpp && \
     CMAKE_ARGS="-DLLAMA_CUBLAS=on" pip install -i "$PIP_INDEX" -U llama-cpp-python && \
