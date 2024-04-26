@@ -5,7 +5,7 @@ COPY . /opt/inference
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 14.21.1
 
-RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list
+COPY /xinference/deploy/docker/ubuntu.sources.list /etc/apt/sources.list
 RUN apt-get -y update \
   && apt install -y curl procps git libgl1 vim net-tools iputils-ping\
   && mkdir -p $NVM_DIR \
