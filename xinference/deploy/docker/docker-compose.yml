@@ -30,6 +30,7 @@ services:
     command: xinference-local --host 0.0.0.0 --port ${CONTAINER_UI_PORT}
     volumes:
       - ${HOST_MODEL_DIR}:${CONTAINER_MODEL_DIR}
+      - ${HOST_EXTRA_MODEL_DIR}:${CONTAINER_EXTRA_MODEL_DIR}
     deploy:
       resources:
         reservations:
