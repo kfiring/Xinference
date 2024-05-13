@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  xinference:
+    build:
+      context: ../../../
+      dockerfile: /xinference/deploy/docker/dev.Dockerfile
+      extra_hosts: 
+        - "raw.githubusercontent.com:185.199.108.133"
+    image: gongjiaing/xinference.dev
+    # image: xprobe/xinference:latest
+    container_name: xinference.dev
+    privileged: true
+    ports:
+      - "${HOST_UI_PORT}:${CONTAINER_UI_PORT}"
+#    volumes:
+#      # Replace <xinference_home> with your xinference home path on the host machine
+#      - <xinference_home>:/root/.xinference
+#      # Replace <huggingface_cache_dir> with your huggingface cache path, default is
+#      # <home_path>/.cache/huggingface
+#      - <huggingface_cache_dir>:/root/.cache/huggingface
+#      # If models are downloaded from modelscope, replace <huggingface_cache_dir> with
+#      # your modelscope cache path, default is <home_path>/.cache/modelscope
+#      - <modelscope_cache_dir>:/root/.cache/modelscope
+#    environment:
+#      # add envs here. Here's an example, if you want to download model from modelscope
+#      - XINFERENCE_MODEL_SRC=modelscope
+    environment:
+      - XINFERENCE_HOME=${CONTAINER_MODEL_DIR}
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+    command: ["bash", "-c", "sleep 1000000000"]
+    volumes:
+      - ${HOST_MODEL_DIR}:${CONTAINER_MODEL_DIR}
+      - ${HOST_EXTRA_MODEL_DIR}:${CONTAINER_EXTRA_MODEL_DIR}
+      - "../../../:/opt/inference"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              driver: nvidia
+              count: all

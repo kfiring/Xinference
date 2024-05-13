@@ -973,13 +973,27 @@ def check_engine_by_spec_parameters(
 ) -> Type[LLM]:
     def get_model_engine_from_spell(engine_str: str) -> str:
         for engine in LLM_ENGINES[model_name].keys():
-            if engine.lower() == engine_str.lower():
-                return engine
+            if engine_str:
+                if engine.lower() == engine_str.lower():
+                    return engine
+                continue
+            else:
+                engine_params_groups: List[Dict] = LLM_ENGINES[model_name][engine]
+                if any([
+                    model_name == ep["model_name"]
+                    and model_format == ep["model_format"]
+                    and model_size_in_billions == ep["model_size_in_billions"]
+                    and quantization in ep["quantizations"]
+                    for ep in engine_params_groups
+                ]):
+                    return engine
         return engine_str
 
     if model_name not in LLM_ENGINES:
         raise ValueError(f"Model {model_name} not found.")
     model_engine = get_model_engine_from_spell(model_engine)
+    logger.info(f"got engine for '{model_name}': {model_engine}")
+    
     if model_engine not in LLM_ENGINES[model_name]:
         raise ValueError(f"Model {model_name} cannot be run on engine {model_engine}.")
     match_params = LLM_ENGINES[model_name][model_engine]

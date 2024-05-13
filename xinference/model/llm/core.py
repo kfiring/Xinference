@@ -207,11 +207,13 @@ def create_llm_model_instance(
 ) -> Tuple[LLM, LLMDescription]:
     from .llm_family import cache, check_engine_by_spec_parameters, match_llm
 
-    if model_engine is None:
-        raise ValueError("model_engine is required for LLM model")
+    # if model_engine is None:
+    #     raise ValueError("model_engine is required for LLM model")
     match_result = match_llm(
         model_name, model_format, model_size_in_billions, quantization
     )
+    logger.info(f"llm match result for '{model_name}' '{model_format}' '{model_size_in_billions}'"
+                f" '{quantization}': {match_result}")
 
     if not match_result:
         raise ValueError(
