@@ -358,16 +358,6 @@ class RESTfulAPI:
             ),
         )
         self._router.add_api_route(
-            "/experimental/speculative_llms",
-            self.launch_speculative_llm,
-            methods=["POST"],
-            dependencies=(
-                [Security(self._auth_service, scopes=["models:start"])]
-                if self.is_authenticated()
-                else None
-            ),
-        )
-        self._router.add_api_route(
             "/v1/models/{model_uid}",
             self.terminate_model,
             methods=["DELETE"],
@@ -649,47 +639,6 @@ class RESTfulAPI:
             logger.error(e, exc_info=True)
             raise HTTPException(status_code=500, detail=str(e))
 
-    async def launch_speculative_llm(self, request: Request) -> JSONResponse:
-        payload = await request.json()
-        model_uid = payload.get("model_uid")
-        model_name = payload.get("model_name")
-        model_size_in_billions = payload.get("model_size_in_billions")
-        quantization = payload.get("quantization")
-        draft_model_name = payload.get("draft_model_name")
-        draft_model_size_in_billions = payload.get("draft_model_size_in_billions")
-        draft_quantization = payload.get("draft_quantization")
-        n_gpu = payload.get("n_gpu", "auto")
-
-        if not model_name:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid input. Please specify the model name",
-            )
-
-        try:
-            model_uid = await (await self._get_supervisor_ref()).launch_speculative_llm(
-                model_uid=model_uid,
-                model_name=model_name,
-                model_size_in_billions=model_size_in_billions,
-                quantization=quantization,
-                draft_model_name=draft_model_name,
-                draft_model_size_in_billions=draft_model_size_in_billions,
-                draft_quantization=draft_quantization,
-                n_gpu=n_gpu,
-            )
-
-        except ValueError as ve:
-            logger.error(str(ve), exc_info=True)
-            raise HTTPException(status_code=400, detail=str(ve))
-        except RuntimeError as re:
-            logger.error(str(re), exc_info=True)
-            raise HTTPException(status_code=503, detail=str(re))
-        except Exception as e:
-            logger.error(str(e), exc_info=True)
-            raise HTTPException(status_code=500, detail=str(e))
-
-        return JSONResponse(content={"model_uid": model_uid})
-
     async def launch_model(
         self, request: Request, wait_ready: bool = Query(True)
     ) -> JSONResponse:
@@ -700,7 +649,7 @@ class RESTfulAPI:
         model_size_in_billions = payload.get("model_size_in_billions")
         model_format = payload.get("model_format")
         quantization = payload.get("quantization")
-        model_type = payload.get("model_type")
+        model_type = payload.get("model_type", "LLM")
         replica = payload.get("replica", 1)
         n_gpu = payload.get("n_gpu", "auto")
         request_limits = payload.get("request_limits", None)
@@ -731,7 +680,12 @@ class RESTfulAPI:
         if not model_name:
             raise HTTPException(
                 status_code=400,
-                detail="Invalid input. Please specify the model name",
+                detail="Invalid input. Please specify the `model_name` field.",
+            )
+        if not model_engine and model_type == "LLM":
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid input. Please specify the `model_engine` field.",
             )
 
         if peft_model_config is not None:
