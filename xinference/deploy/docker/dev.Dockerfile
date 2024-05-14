@@ -1,4 +1,5 @@
 FROM pytorch/pytorch:2.1.2-cuda12.1-cudnn8-devel
+ARG DEBIAN_FRONTEND=noninteractive
 
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 14.21.1
