@@ -2042,6 +2042,15 @@ def get_cmdclass(cmdclass=None):
         from setuptools.command.egg_info import egg_info as _egg_info
 
     class cmd_egg_info(_egg_info):
+        def run(self):
+            if os.path.isdir(self.egg_info):
+                # 提高效率，如果xinference.egg-info目录已经存在则先删除掉，因为如果不删掉，
+                # 在后面的find_sources中又会扫描SOURCES.txt，而SOURCES.txt本来就是要在find_sources
+                # 中重建的
+                import shutil
+                shutil.rmtree(self.egg_info)
+            super().run()
+
         def find_sources(self):
             # egg_info.find_sources builds the manifest list and writes it
             # in one shot

@@ -1,6 +1,21 @@
-global-include *.pyx
-global-include *.pxd
-global-include xinference/**/*.json
+# 下面去掉了global-include，而是逐个目录细分的去include，因为gloabl-include会先做一次全目录递归扫描，
+# 这里面可能就包含了一些没必要扫描的目录，特别是大目录，例如web/ui下的node_modules目录，其中的文件目录非常之多，
+# 扫描起来慢的让人无法忍受，而其中的内容又没有必要包含在最终的egg包里面（其中应该是node.js的一些包），排除
+# 掉后，效率大大提高。且测试后也是ok的
+# global-include *.pyx
+# global-include *.pxd
+# global-include xinference/**/*.json
+include xinference/*.pyx 
+include xinference/*.pxd
+include xinference/*.json
+recursive-include xinference/api *.pyx *.pxd *.json
+recursive-include xinference/client *.pyx *.pxd *.json
+recursive-include xinference/core *.pyx *.pxd *.json
+recursive-include xinference/deploy *.pyx *.pxd *.json
+recursive-include xinference/locale *.pyx *.pxd *.json
+recursive-include xinference/model *.pyx *.pxd *.json
+recursive-include xinference/thirdparty *.pyx *.pxd *.json
+
 global-exclude *.c
 global-exclude *.cpp
 include setup.cfg
@@ -9,7 +24,8 @@ global-exclude .DS_Store
 include versioneer.py
 include xinference/_version.py
 global-exclude conftest.py
-include xinference/locale/*.json
-include xinference/model/llm/*.json
-include xinference/model/embedding/*.json
-global-include xinference/web/ui/build/**/*
+# include xinference/locale/*.json
+# include xinference/model/llm/*.json
+# include xinference/model/embedding/*.json
+# global-include xinference/web/ui/build/**/*
+recursive-include xinference/web/ui/build *
