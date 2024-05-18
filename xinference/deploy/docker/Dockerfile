@@ -25,10 +25,12 @@ RUN python -m pip install --upgrade -i "$PIP_INDEX" pip && \
     pip uninstall -y torchvision torchaudio && \
     CMAKE_ARGS="-DGGML_CUBLAS=ON" pip install -i "$PIP_INDEX" -U chatglm-cpp && \
     CMAKE_ARGS="-DLLAMA_CUBLAS=on" pip install -i "$PIP_INDEX" -U llama-cpp-python && \
-    # pip install -i "$PIP_INDEX" -U  intel-extension-for-pytorch &&\
     cd /opt/inference && \
     python setup.py build_web && \
     git restore . && \
     pip install -i "$PIP_INDEX" ".[all]" && \
     pip uninstall -y opencv-contrib-python && \
-    pip install -i "$PIP_INDEX" opencv-contrib-python-headless
+    pip install -i "$PIP_INDEX" opencv-contrib-python-headless && \
+    # clean packages
+    pip cache purge && \
+    conda clean --force-pkgs-dirs -y
