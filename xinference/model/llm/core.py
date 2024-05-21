@@ -220,7 +220,7 @@ def create_llm_model_instance(
         llm_spec.model_size_in_billions,
         quantization,
     )
-    logger.debug(f"Launching {model_uid} with {llm_cls.__name__}")
+    logger.info(f"Launching {model_uid} with {llm_cls.__name__}")
 
     save_path = cache(llm_family, llm_spec, quantization)
 
